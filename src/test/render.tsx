@@ -18,7 +18,10 @@ export function renderWithProviders(
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <Provider store={store}>
-        <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+        {/* Same as the app (main.tsx): synchronous URL updates. */}
+        <MemoryRouter initialEntries={[route]} useTransitions={false}>
+          {children}
+        </MemoryRouter>
       </Provider>
     )
   }
