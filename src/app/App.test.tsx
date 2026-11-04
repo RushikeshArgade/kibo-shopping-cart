@@ -4,10 +4,16 @@ import { renderWithProviders } from '../test/render'
 import { App } from './App'
 
 describe('App shell', () => {
-  it('renders the site heading and a skip link to main content', () => {
+  it('links the brand home and gives the page its own h1', () => {
     renderWithProviders(<App />)
 
-    expect(screen.getByRole('heading', { level: 1, name: /kibo shop/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Kibo Shop' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('heading', { level: 1, name: 'Products' })).toBeInTheDocument()
+  })
+
+  it('has a skip link to the main content', () => {
+    renderWithProviders(<App />)
+
     expect(screen.getByRole('link', { name: /skip to content/i })).toHaveAttribute('href', '#main')
   })
 })
