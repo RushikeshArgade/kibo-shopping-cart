@@ -128,8 +128,50 @@ and turns performance into an assumption.
 
 ## Verification — AI-generated tests
 
-- _TODO: which edge-case tests the AI drafted, and how I proved they were meaningful
-  (e.g. broke the code on purpose and confirmed the test failed)._
+My rule in `CLAUDE.md`: a test only counts if it fails when the behaviour it covers is broken.
+So after Claude writes tests, the code gets broken on purpose to see if they catch it.
+
+### Money helpers — the check exposed a useless test
+
+Claude's first tests for `toCents` used `9.85` as the "floating-point drift" example. Running
+the check (swap `Math.round` for `Math.floor`), all 15 tests still passed — the tests didn't
+catch the exact bug they were written for. In Node, `9.85 * 100` is exactly `985`, so the
+example never drifted. The values that really drift are like `19.99 * 100 = 1998.9999…`.
+
+Before:
+
+```ts
+[9.85, 985], // 9.85 * 100 = 984.9999… in floating point
+```
+
+After:
+
+```ts
+// These multiply to just below the whole cent (19.99 * 100 = 1998.9999…),
+// so truncating instead of rounding would lose a cent.
+it.each([
+  [19.99, 1999],
+  [4.35, 435],
+  [1.15, 115],
+  [0.29, 29],
+])('rounds %d dollars up to %d cents despite float drift', ...)
+```
+
+With the fix, the same break makes 4 tests fail. Claude ran this check, following my rule; the
+lesson for me: 100% coverage meant nothing here — the test passed for the wrong reason.
+
+### Product schemas — I ran the check myself
+
+I made two breaks in `schemas.ts`:
+
+1. Removed the HTTPS rule (`z.url({ protocol: /^https$/ })` → `z.url()`) → the `http image` and
+   `javascript: image` tests failed. ✅
+2. Replaced `continue` with `throw` (fail the whole list on one bad product) → the "drops an
+   invalid product, keeps the rest" test failed. ✅
+
+3 tests failed in total, exactly the ones covering those behaviours. "Throws when every product
+is invalid" still passed with break 2 — correct, since it checks a different behaviour. Each
+test targets one behaviour, so a break only fails the tests about that behaviour.
 
 ## A Disagreement
 
