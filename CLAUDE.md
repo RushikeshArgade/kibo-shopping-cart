@@ -167,3 +167,23 @@ file only, never from deep paths inside another feature.
 - Keep changes small: one vertical slice per change.
 - **State your assumptions and trade-offs explicitly** in each response so they can be reviewed.
 - Run `npm run typecheck && npm run lint && npm test` before calling work done.
+- **Never commit without asking.** Before every commit, list the files and the exact commit
+  message, and wait for my approval. Approval for one commit does not cover the next.
+
+## Commit messages
+
+Conventional Commits, kept short:
+
+```
+<type>(<optional scope>): <short description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+- Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `build`, `ci`, `chore`.
+- Scopes: `products`, `cart`, `app`, `ui`, `test`, `e2e`, `ci`, `deps`, `docs`.
+- Subject: imperative, lowercase, no period, **≤ 50 characters** (hard limit 72).
+- Body only when the "why" isn't obvious: at most 3 short lines, wrapped at 72.
+- Footer: `Co-Authored-By` line for AI-assisted commits.
