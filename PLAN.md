@@ -15,7 +15,7 @@ Working one step at a time. Each step follows the same loop:
 | ------------------------------- | -------------- |
 | 0. Decisions + AI context       | ✅ Done        |
 | 1. Architecture                 | 🟡 ADR pending |
-| 2. Build in slices              | ⬜ Next        |
+| 2. Build in slices              | 🟡 In progress |
 | 3. Tests (per slice + e2e)      | ⬜             |
 | 4. Performance                  | ⬜             |
 | 5. Security, review, docs, ship | ⬜             |
@@ -35,14 +35,17 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 - Vercel: https://kibo-shopping-cart-psi.vercel.app — `/cart` and deep paths serve the app
   (SPA rewrite verified).
 
-### ⬜ 2. Products data layer
+### ✅ 2. Products data layer
 
 - `shared/lib/money` — dollars → cents, format with `Intl.NumberFormat`.
 - `features/products` — Zod schemas, deterministic fake inventory, RTK Query `productsApi`
-  (products + categories, retry once).
-- MSW handlers + fixtures.
-- **Tests:** money helpers (100%), schema rejects malformed data, inventory is deterministic,
-  fetch success / error / malformed via MSW.
+  (products + categories, retry once on network/5xx only).
+- Validation runs in `queryFn`, so bad data is a normal `CUSTOM_ERROR` (a throw in
+  `transformResponse` is treated as an unhandled error by RTK Query).
+- MSW handlers + fixtures. Tests split into Node (`*.test.ts`) and jsdom (`*.test.tsx`)
+  projects: full suite ~3s instead of minutes.
+- **Tests:** 49 passing, 96% coverage; money helpers 100%; break-tests run on money and
+  schemas.
 
 ### ⬜ 3. Product listing UI
 
