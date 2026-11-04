@@ -1,12 +1,15 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { productsApi } from '../features/products'
 
-// Feature reducers (products API, cart slice) are registered here as they land.
-const rootReducer = combineReducers({})
+const rootReducer = combineReducers({
+  [productsApi.reducerPath]: productsApi.reducer,
+})
 
 export function makeStore(preloadedState?: Partial<RootState>) {
   return configureStore({
     reducer: rootReducer,
     preloadedState,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(productsApi.middleware),
   })
 }
 
