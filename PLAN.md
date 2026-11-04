@@ -47,11 +47,13 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 - **Tests:** 49 passing, 96% coverage; money helpers 100%; break-tests run on money and
   schemas.
 
-### ⬜ 3. Product listing UI
+### ✅ 3. Product listing UI
 
-- Product card (image, title, price, category, rating, stock status), responsive grid.
+- Product card (image, title, price, category, rating, stock status); grid 2/3/4 columns.
 - Loading skeleton, empty state, error state with "Try again".
-- **Tests:** each state rendered from MSW responses; images have alt text.
+- Brand is a link home; each page owns its `<h1>`. Categories shown as the API sends them.
+- Checked in the browser at 320px (no horizontal scroll), 375px, 768px and 1280px.
+- **Tests:** 61 passing; each state rendered from MSW responses; images have alt text.
 
 ### ⬜ 4. Filter, search, sort, pagination (URL-driven)
 

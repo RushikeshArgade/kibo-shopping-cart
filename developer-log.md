@@ -88,6 +88,31 @@ redux-persist, and with my own code I control versioning and Zod validation of w
 - **Not handled on purpose**: a price change between adding to cart and checkout. It needs a
   server to check the current price.
 
+### 2026-11-05 — Product listing UI **[review]**
+
+- **2 columns on mobile**, 3 on tablet, 4 on desktop — the common e-commerce pattern, so
+  shoppers see more products at once.
+- **Skeleton cards while loading**, not a spinner: the page doesn't jump when products arrive,
+  and it feels faster.
+- **Categories shown exactly as the API sends them** (`jewelery`, `men's clothing`). Claude
+  suggested a small label map to fix the spelling and capitalisation. I went with as-is because the
+  original data should be fixed, not patched in the UI. Today it's one category; if more come
+  in the future, do we write a patch for each of them? Fixing the source data once is easier to
+  identify and maintain — one single source of truth.
+- **Headings**: the brand "Kibo Shop" is a link home, not the `<h1>`; each page has its own `<h1>`
+  ("Products"), so screen-reader users jumping by heading land on the page content.
+- **No description on the card** and **no product detail page** — the brief doesn't ask for them,
+  so they're future improvements, not scope.
+
+### 2026-11-05 — Overriding a lint rule, on one line only **[review]**
+
+The linter (`jsx-a11y/prefer-tag-over-role`) wanted `<output>` instead of `<p role="status">` for
+the hidden "Loading products" message. I kept `role="status"`: `<output>` is meant for the result
+of a calculation or user action, and its support as a live region has been less consistent than
+an explicit `role="status"`. I disabled the rule for that one line only, with the reason in a
+comment next to it, instead of turning it off for the whole project — so the linter still checks
+everywhere else.
+
 ## Human Audit (≥3, at least one structural)
 
 | #   | Area                         | What the AI produced                             | What I changed and why                                                                                                                                           |
@@ -176,4 +201,4 @@ test targets one behaviour, so a break only fails the tests about that behaviour
 ## A Disagreement
 
 - _TODO: pick the strongest one. Candidates so far: Next.js vs Vite + React; keeping unavailable
-  items visible instead of removing them._
+  items visible instead of removing them; categories shown as-is instead of a label map._
