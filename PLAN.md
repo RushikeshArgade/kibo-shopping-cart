@@ -27,12 +27,13 @@ Working one step at a time. Each step follows the same loop:
 Stack, state management, persistence, cart behaviour, testing approach, `CLAUDE.md`,
 developer log, tooling. Commits: scaffold, LF endings, commit rules.
 
-### ⬜ 1. GitHub, CI and deploy (early, so every later push is checked)
+### ✅ 1. GitHub, CI and deploy (early, so every later push is checked)
 
-- Push repo to GitHub (I create the empty repo).
-- GitHub Actions: typecheck, lint, format check, tests, build on every push.
-- Vercel connected, SPA rewrite (`vercel.json`) so `/cart` works on refresh.
-- **Done when:** a push shows green CI and a live URL.
+- Repo: https://github.com/RushikeshArgade/kibo-shopping-cart (private until submission).
+- GitHub Actions: typecheck, lint, format check, tests, build, then Playwright e2e — first
+  run green.
+- Vercel: https://kibo-shopping-cart-psi.vercel.app — `/cart` and deep paths serve the app
+  (SPA rewrite verified).
 
 ### ⬜ 2. Products data layer
 
@@ -66,6 +67,8 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 
 - Add to Cart on cards (disabled when out of stock / at max), header badge, `/cart` page.
 - `aria-live` announcements; focus moves sensibly after removing a line.
+- "Page not found" route: the SPA rewrite sends every unknown URL to the app, so React Router
+  must show a proper 404 page.
 - **Tests:** add → badge updates; quantity controls; remove; empty cart state.
 
 ### ⬜ 7. Persistence and tab sync
@@ -98,7 +101,9 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 
 ### ⬜ 12. Security
 
-- `npm audit`, review API/persisted data handling, consider security headers on Vercel.
+- `npm audit`, review API/persisted data handling.
+- Security headers on Vercel: the live site currently sends HSTS only — add CSP,
+  `X-Content-Type-Options`, `Referrer-Policy`, frame protection.
 - Findings and decisions in the README.
 
 ### ⬜ 13. Code review exercise

@@ -1,6 +1,10 @@
 # Kibo Shop — Shopping Cart
 
+[![CI](https://github.com/RushikeshArgade/kibo-shopping-cart/actions/workflows/ci.yml/badge.svg)](https://github.com/RushikeshArgade/kibo-shopping-cart/actions/workflows/ci.yml)
+
 Shopping cart web application built for the Kibo Commerce Senior UI Engineer assessment.
+
+**Live:** https://kibo-shopping-cart-psi.vercel.app
 
 > Work in progress. Architecture, testing, performance, security and accessibility notes will be
 > completed as each feature lands.
