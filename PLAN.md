@@ -97,17 +97,22 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
   browser); break-tests proved the no-loop and reload tests fail when broken.
 - **`docs/adr-001-state-management.md`** written.
 
-### ⬜ 8. Reconcile cart with catalog
+### ✅ 8. Reconcile cart with catalog
 
-- Out of stock → disabled line, excluded from total. Stock below quantity → cap + notice.
-  Missing product → "No longer available".
-- **Tests:** each case, plus totals exclude unavailable lines.
+- On the cart page: out of stock → greyed line, "Out of stock", excluded from subtotal;
+  missing → "No longer available"; quantity above stock → capped (and saved) with a note.
+- The app layer passes products into `CartPage`, so cart code never imports product code at
+  runtime (no circular dependency). Verified in the browser with a planted old saved cart.
+- **Tests:** 166 unit; 100% on cart files (the threshold caught two untested branches).
 
-### ⬜ 9. End-to-end tests
+### ✅ 9. End-to-end tests
 
-- Playwright: browse → add → change quantity → totals update (desktop + mobile).
-- Error path with `page.route`. Coverage report + per-file 100% thresholds for cart and money.
-- Edit a search mid-word and check the cursor stays put (guards the `useTransitions` fix).
+- Playwright (desktop + mobile): main journey browse → filter → add → +/− → totals; API error
+  → Try again; reload keeps the cart; two tabs sync; editing a search mid-word.
+- API mocked with the unit-test fixtures (`e2e/helpers.ts`) — no dependency on fakestoreapi.
+- Break-tests: totals bug → journey fails; router transitions back on → search box ends up
+  as "Y". CI now runs `npm run coverage` (thresholds enforced) and uploads the HTML report.
+- README "Testing" section: tools, threshold and why, the deliberately unhandled edge case.
 
 ### ⬜ 10. Responsive and accessibility pass
 

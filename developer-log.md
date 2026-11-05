@@ -140,6 +140,17 @@ everywhere else.
   the trade-off in the README. Also learned: jsdom and Playwright's default headless browser
   don't reproduce this focus loss, so it can only be checked manually in a real browser.
 
+### 2026-11-05 — Persistence and reconciling with the catalog **[review]**
+
+- **Persistence** follows the ADR: `localStorage`, my own small middleware, Zod on load, tab sync
+  without writing back. I asked for it to be kept simple.
+- **Reconciling with the catalog** happens on the cart page only. Out-of-stock and missing
+  products stay as greyed lines with Remove and are left out of the subtotal (my idea from the
+  planning stage); a quantity above current stock is lowered with a note. The header count still
+  counts everything in the cart, since those items are there until removed.
+- Claude kept the cart feature from importing product code at runtime by having the app layer
+  pass products into the cart page — no circular dependency between features.
+
 ## Human Audit (≥3, at least one structural)
 
 | #   | Area                         | What the AI produced                             | What I changed and why                                                                                                                                           |
@@ -224,6 +235,22 @@ I made two breaks in `schemas.ts`:
 3 tests failed in total, exactly the ones covering those behaviours. "Throws when every product
 is invalid" still passed with break 2 — correct, since it checks a different behaviour. Each
 test targets one behaviour, so a break only fails the tests about that behaviour.
+
+### Tests that couldn't fail were removed **[review]**
+
+Not every test is meaningful in every environment. A unit test that "focus stays on the Add to
+cart button at the stock limit" passed even with the bug in place: jsdom doesn't move focus when
+a button becomes disabled, and neither did Playwright's default headless browser — only a real
+browser did. So that test was removed rather than kept as false confidence, and the behaviour is
+noted as a manual check.
+
+### End-to-end tests — checked the same way **[review]**
+
+- **Main journey** (browse → add → +/− → totals): breaking the subtotal so it ignored quantity made
+  the test fail exactly at the totals check.
+- **Search editing mid-word:** switching the router transitions back on made the search box end up
+  as just `"Y"` instead of `"mens casualXY premium"` — the bug was even worse under fast typing than
+  when I first saw it by hand. The test stays, and guards the `useTransitions={false}` fix.
 
 ## A Disagreement
 
