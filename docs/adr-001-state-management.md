@@ -88,9 +88,8 @@ the user is looking at, so it lives in the **URL**.
 **Negative / accepted**
 
 - More code than a minimal Zustand setup.
-- The production JS bundle grew from 264 KB (84 KB gzip) at the scaffold to 443 KB (139 KB gzip)
-  after the cart work. I haven't yet measured how much of that each library contributes; that
-  breakdown belongs to the bundle analysis in `docs/performance-notes.md`.
+- Bundle cost: Redux Toolkit (with RTK Query) measured at 32 KB gzipped — about a quarter of
+  the JS after the Zod fix (125 KB gzipped total). See `docs/performance-notes.md`.
 - `localStorage` is per-browser: the cart doesn't follow the user to another device. A real store
   would use a server-side cart for signed-in users.
 - Last write wins across tabs: simultaneous edits in two tabs aren't merged.

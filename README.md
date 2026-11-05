@@ -99,5 +99,5 @@ and 1280px on every page — no horizontal scrolling. Touch targets are at least
 - [`developer-log.md`](developer-log.md) — AI-augmentation log
 - [`CLAUDE.md`](CLAUDE.md) — context and rules given to the AI assistant
 - [`docs/adr-001-state-management.md`](docs/adr-001-state-management.md) — state management decision
-- `docs/performance-notes.md` — _coming_
+- [`docs/performance-notes.md`](docs/performance-notes.md) — what was measured, found and changed
 - `review/CODE_REVIEW.md` — _coming_
