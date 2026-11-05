@@ -42,6 +42,6 @@ Before the first e2e run, install the browser once: `npx playwright install chro
 
 - [`developer-log.md`](developer-log.md) — AI-augmentation log
 - [`CLAUDE.md`](CLAUDE.md) — context and rules given to the AI assistant
-- `docs/adr-001-state-management.md` — _coming_
+- [`docs/adr-001-state-management.md`](docs/adr-001-state-management.md) — state management decision
 - `docs/performance-notes.md` — _coming_
 - `review/CODE_REVIEW.md` — _coming_

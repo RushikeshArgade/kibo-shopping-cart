@@ -88,12 +88,14 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
   disables itself drops keyboard focus to `<body>` — to document in the README (step 10).
 - **Tests:** 138 unit + 2 e2e; focus-after-removal tests proven by a break-test.
 
-### ⬜ 7. Persistence and tab sync
+### ✅ 7. Persistence and tab sync
 
-- Listener middleware: save to `localStorage` with `version`; load with Zod, fall back to empty.
-- `storage` event replaces the cart (last write wins); never write back storage-driven changes.
-- **Tests:** reload restores cart; corrupted/old data → empty cart; no write-back loop.
-- Then write **`docs/adr-001-state-management.md`** (decision is now proven in code).
+- Listener middleware saves `{ version: 1, lines }` to `localStorage`; loaded and validated with
+  Zod before the first render; blocked or full storage never crashes.
+- `storage` event replaces the cart (last write wins); `replaceCart` is never saved (no loop).
+- **Tests:** 155 unit + 6 e2e — reload keeps the cart and a second tab sees changes (real
+  browser); break-tests proved the no-loop and reload tests fail when broken.
+- **`docs/adr-001-state-management.md`** written.
 
 ### ⬜ 8. Reconcile cart with catalog
 
