@@ -60,6 +60,40 @@ Before the first e2e run, install the browser once: `npx playwright install chro
 - **Deliberately not handled:** a price change between adding to cart and checkout. It needs a
   server to confirm the current price; the cart shows the price from when the item was added.
 
+## Responsive design and accessibility
+
+**Responsive:** mobile-first; 2 product columns on phones (the common e-commerce pattern), 3 on
+tablet, 4 on desktop; 12 products per page so every row is full. Checked at 320px, 375px, 768px
+and 1280px on every page — no horizontal scrolling. Touch targets are at least 44×44px.
+
+**Choices and why:**
+
+- **Semantic HTML first:** `header`, `nav`, `main`, one `<h1>` per page, a `<search>` landmark,
+  lists for the grid and cart, a `<fieldset>` + `<legend>` for each quantity stepper, real links
+  for pagination (`aria-current="page"`). ARIA only where HTML can't express it.
+- **Keyboard:** skip link to the main content; logical tab order; visible focus rings on every
+  control (`focus-visible`). After paging, focus moves to the results summary; after removing a
+  cart line, focus moves to the next line, the previous one, or the "Your cart" heading.
+- **Screen readers:** one shared polite live region announces cart changes ("Added … 3 items in
+  cart."); the results summary is a live region; buttons name their product ("Add to cart:
+  Backpack", "Remove Backpack") with explicit `aria-label`s, because Chrome adds a stray space
+  before punctuation when a name comes from a visually hidden span. Per-page `<title>`s.
+- **Colour contrast:** all text measured against its background in the browser — every pair
+  meets WCAG AA; the lowest is the green "In stock" at 4.95:1. Stock status is always written
+  out, never shown by colour alone.
+
+**Trade-offs made under time pressure:**
+
+- **Buttons at the stock limit use native `disabled`.** If you press "Add to cart" (or `+`) until
+  the limit while using the keyboard, the button disables itself and keyboard focus drops to the
+  top of the page. Keeping the button focusable with `aria-disabled` fixes this but adds
+  complexity; I chose the simple version and documented it. It's also not something the test
+  tools catch (jsdom and headless Chromium don't reproduce it), so it was checked by hand.
+- **Category names are shown exactly as the API sends them** (`jewelery`, lowercase): the data
+  should be fixed at the source, not patched in the UI.
+- **No automated accessibility scanner** (such as axe) in CI yet — contrast and keyboard order were
+  checked manually in the browser.
+
 ## Project docs
 
 - [`developer-log.md`](developer-log.md) — AI-augmentation log
