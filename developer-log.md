@@ -125,6 +125,21 @@ everywhere else.
   it. It suggested a refinement (first keystroke adds an entry). I kept it as designed because
   _TODO: my reason_.
 
+### 2026-11-05 — Cart UI **[review]**
+
+- **"Add to cart" stays on the card** with "2 in cart" under it; quantities are changed on the
+  `/cart` page — one place to manage them, and simpler cards in a 2-column mobile grid.
+- **Cart on its own page**, no checkout button: a button that can't work looks unfinished
+  (same reason I dropped "notify me").
+- **Focus after removing a line** goes to the next line, else the previous one, else the
+  heading, so keyboard users aren't lost when the button they pressed disappears.
+- **Native `disabled` at the stock limit — a deliberate trade-off.** Testing in the browser
+  showed that when a focused button disables itself (third "Add to cart" on a stock-3 product,
+  or `+` reaching the limit), keyboard focus drops to `<body>`. Claude proposed `aria-disabled`
+  so the button stays focusable. I chose the simple implementation for now and will document
+  the trade-off in the README. Also learned: jsdom and Playwright's default headless browser
+  don't reproduce this focus loss, so it can only be checked manually in a real browser.
+
 ## Human Audit (≥3, at least one structural)
 
 | #   | Area                         | What the AI produced                             | What I changed and why                                                                                                                                           |

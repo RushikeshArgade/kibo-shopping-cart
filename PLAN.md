@@ -76,13 +76,17 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 - Per-file 100% coverage thresholds for cart and money files — verified to fail when coverage drops.
 - **Tests:** 18 cart tests at 100%; 115 overall.
 
-### ⬜ 6. Cart UI
+### ✅ 6. Cart UI
 
-- Add to Cart on cards (disabled when out of stock / at max), header badge, `/cart` page.
-- `aria-live` announcements; focus moves sensibly after removing a line.
-- "Page not found" route: the SPA rewrite sends every unknown URL to the app, so React Router
-  must show a proper 404 page.
-- **Tests:** add → badge updates; quantity controls; remove; empty cart state.
+- Add to cart on cards ("N in cart" / "Max N in cart"), header link "Cart (3)", `/cart` page
+  with `− n +` stepper (fieldset + legend), line totals, Remove, subtotal, empty state.
+- One shared `aria-live` announcer; buttons use explicit `aria-label`s (Chrome adds a stray
+  space before ":" when names come from hidden spans).
+- Focus after removing a line: next line → previous line → "Your cart" heading.
+- 404 page for unknown URLs; per-page titles via React 19 `<title>`.
+- Native `disabled` at the stock limit, kept simple. Known trade-off: a focused button that
+  disables itself drops keyboard focus to `<body>` — to document in the README (step 10).
+- **Tests:** 138 unit + 2 e2e; focus-after-removal tests proven by a break-test.
 
 ### ⬜ 7. Persistence and tab sync
 
