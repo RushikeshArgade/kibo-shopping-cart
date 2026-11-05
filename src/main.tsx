@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router'
 import { App } from './app/App'
 import { makeStore } from './app/store'
+import { AnnouncerProvider } from './shared/ui/Announcer'
 import './index.css'
 
 const store = makeStore()
@@ -15,7 +16,9 @@ createRoot(document.getElementById('root')!).render(
           updated inside a transition loses its cursor position while typing. No Suspense-based
           routes here, so transitions bring no benefit. */}
       <BrowserRouter useTransitions={false}>
-        <App />
+        <AnnouncerProvider>
+          <App />
+        </AnnouncerProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>,

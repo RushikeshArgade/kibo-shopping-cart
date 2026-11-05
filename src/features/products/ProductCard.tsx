@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { formatCents } from '../../shared/lib/money'
 import { StarRating } from '../../shared/ui/StarRating'
+import { AddToCartButton } from '../cart'
 import { LOW_STOCK_THRESHOLD, stockLabel } from './stockLabel'
 import type { Product } from './types'
 
@@ -39,6 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <p className="mt-auto pt-2 text-base font-semibold">{formatCents(priceCents)}</p>
       <p className={`text-sm ${stockTone(stock)}`}>{stockLabel(stock)}</p>
+      <AddToCartButton product={product} />
     </article>
   )
 }

@@ -3,6 +3,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router'
 import { makeStore, type AppStore, type RootState } from '../app/store'
+import { AnnouncerProvider } from '../shared/ui/Announcer'
 
 interface Options extends Omit<RenderOptions, 'wrapper'> {
   preloadedState?: Partial<RootState>
@@ -10,7 +11,8 @@ interface Options extends Omit<RenderOptions, 'wrapper'> {
   route?: string
 }
 
-// Renders with a real store and router so tests exercise the same wiring as the app.
+// Renders with the same providers as main.tsx (store, router, announcer), so tests exercise
+// the same wiring as the app.
 export function renderWithProviders(
   ui: ReactElement,
   { preloadedState, store = makeStore(preloadedState), route = '/', ...options }: Options = {},
@@ -20,7 +22,7 @@ export function renderWithProviders(
       <Provider store={store}>
         {/* Same as the app (main.tsx): synchronous URL updates. */}
         <MemoryRouter initialEntries={[route]} useTransitions={false}>
-          {children}
+          <AnnouncerProvider>{children}</AnnouncerProvider>
         </MemoryRouter>
       </Provider>
     )

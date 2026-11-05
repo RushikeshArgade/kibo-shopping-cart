@@ -1,3 +1,5 @@
+export { AddToCartButton } from './AddToCartButton'
+export { CartLink } from './CartLink'
 export {
   addToCart,
   cartReducer,

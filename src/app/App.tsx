@@ -1,4 +1,5 @@
 import { Link, Route, Routes } from 'react-router'
+import { CartLink } from '../features/cart'
 import { ProductsPage } from '../features/products'
 
 export function App() {
@@ -19,6 +20,9 @@ export function App() {
           >
             Kibo Shop
           </Link>
+          <nav aria-label="Main">
+            <CartLink />
+          </nav>
         </div>
       </header>
       <main id="main" className="mx-auto max-w-7xl px-4 py-6">
