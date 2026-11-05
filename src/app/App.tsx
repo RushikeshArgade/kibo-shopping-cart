@@ -1,5 +1,5 @@
 import { Link, Route, Routes } from 'react-router'
-import { CartLink } from '../features/cart'
+import { CartLink, CartPage } from '../features/cart'
 import { ProductsPage } from '../features/products'
 
 export function App() {
@@ -28,6 +28,7 @@ export function App() {
       <main id="main" className="mx-auto max-w-7xl px-4 py-6">
         <Routes>
           <Route path="/" element={<ProductsPage />} />
+          <Route path="/cart" element={<CartPage />} />
         </Routes>
       </main>
     </div>

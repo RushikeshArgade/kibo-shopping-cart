@@ -21,8 +21,15 @@ export function AddToCartButton({ product }: { product: Product }) {
   return (
     <div className="mt-2">
       {/* Disabled when out of stock or at the limit; the visible text says why. */}
-      <Button onClick={add} disabled={atMax} className="w-full">
-        Add to cart<span className="sr-only">: {product.title}</span>
+      <Button
+        onClick={add}
+        disabled={atMax}
+        // Explicit label: browsers put a stray space before ":" when the product name comes
+        // from a visually hidden span. Starts with the visible text (WCAG "label in name").
+        aria-label={`Add to cart: ${product.title}`}
+        className="w-full"
+      >
+        Add to cart
       </Button>
       {/* Always takes one line, even when empty, so cards in a row keep prices and buttons aligned. */}
       <p className="mt-1 min-h-4 text-xs text-slate-700">
