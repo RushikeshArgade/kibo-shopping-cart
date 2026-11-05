@@ -113,6 +113,18 @@ an explicit `role="status"`. I disabled the rule for that one line only, with th
 comment next to it, instead of turning it off for the whole project — so the linter still checks
 everywhere else.
 
+### 2026-11-05 — Filter, search, sort and pagination **[review]**
+
+- **12 products per page**: divides evenly by 2, 3 and 4 columns, so rows are always full.
+- **Default sort "Featured"** (the API's order), like most stores.
+- **Category as a native `<select>`**, not chips: accessible out of the box and still works with
+  50 categories, which fits the "designed for scale" reason behind the categories endpoint.
+- **Live search** as you type; bad URL values fall back to defaults so old links still work.
+- **Back button**: Claude noticed in the browser that the first search keystroke replaces the
+  history entry before it, so one Back undoes both the search and the category change before
+  it. It suggested a refinement (first keystroke adds an entry). I kept it as designed because
+  _TODO: my reason_.
+
 ## Human Audit (≥3, at least one structural)
 
 | #   | Area                         | What the AI produced                             | What I changed and why                                                                                                                                           |

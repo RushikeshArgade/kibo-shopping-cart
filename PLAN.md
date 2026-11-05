@@ -55,12 +55,17 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 - Checked in the browser at 320px (no horizontal scroll), 375px, 768px and 1280px.
 - **Tests:** 61 passing; each state rendered from MSW responses; images have alt text.
 
-### ⬜ 4. Filter, search, sort, pagination (URL-driven)
+### ✅ 4. Filter, search, sort, pagination (URL-driven)
 
-- Pure `filter → sort → paginate` function; hook that reads/writes URL params.
-- Category select, search input, sort select, pagination controls — all keyboard accessible.
-- Changing a filter resets to page 1.
-- **Tests:** pure function edge cases (empty result, last page, ties in sort); URL ↔ UI sync.
+- Pure `queryCatalog` (filter → stable sort → paginate, 12 per page); `useCatalogParams` reads
+  and writes the URL, bad values fall back to defaults, defaults are left out of the URL.
+- Search, category `<select>`, sort `<select>` inside a `<search>` landmark; pagination as
+  real links with `aria-current`; focus moves to the results summary after paging.
+- `BrowserRouter useTransitions={false}`: fixes the search cursor jumping to the end while
+  typing (found in the browser, not by jsdom tests).
+- Back button: search keystrokes replace the current history entry, so Back undoes a search
+  together with the change before it — kept as designed.
+- **Tests:** 97 passing; catalog logic 100%; deep links, URL sync, page reset, focus.
 
 ### ⬜ 5. Cart state
 
@@ -93,6 +98,7 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 
 - Playwright: browse → add → change quantity → totals update (desktop + mobile).
 - Error path with `page.route`. Coverage report + per-file 100% thresholds for cart and money.
+- Edit a search mid-word and check the cursor stays put (guards the `useTransitions` fix).
 
 ### ⬜ 10. Responsive and accessibility pass
 
@@ -102,6 +108,8 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
 ### ⬜ 11. Performance
 
 - Measure: React Profiler (what re-renders on add to cart), Lighthouse, bundle analysis.
+- Known starting point: JS bundle grew from 264 KB (84 KB gzip) at scaffold to 431 KB
+  (135 KB gzip) after step 4 — mostly RTK Query and Zod.
 - Fix what's found; write **`docs/performance-notes.md`** with before/after evidence.
 
 ### ⬜ 12. Security
