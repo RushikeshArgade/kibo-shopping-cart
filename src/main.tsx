@@ -4,10 +4,13 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router'
 import { App } from './app/App'
 import { makeStore } from './app/store'
+import { cartStateFromLines, loadCart, syncCartAcrossTabs } from './features/cart'
 import { AnnouncerProvider } from './shared/ui/Announcer'
 import './index.css'
 
-const store = makeStore()
+// The saved cart is read synchronously before the first render, so it never flashes empty.
+const store = makeStore({ cart: cartStateFromLines(loadCart()) })
+syncCartAcrossTabs(store.dispatch)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

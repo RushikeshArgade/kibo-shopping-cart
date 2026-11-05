@@ -1,5 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { cartReducer } from '../features/cart'
+import { cartPersistence, cartReducer } from '../features/cart'
 import { productsApi } from '../features/products'
 
 const rootReducer = combineReducers({
@@ -11,7 +11,8 @@ export function makeStore(preloadedState?: Partial<RootState>) {
   return configureStore({
     reducer: rootReducer,
     preloadedState,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(productsApi.middleware),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().prepend(cartPersistence.middleware).concat(productsApi.middleware),
   })
 }
 

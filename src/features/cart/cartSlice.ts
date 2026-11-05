@@ -52,11 +52,21 @@ const cartSlice = createSlice({
     clearCart(state) {
       cartAdapter.removeAll(state)
     },
+    /** Replaces the whole cart, e.g. with the version another tab saved. */
+    replaceCart(state, action: PayloadAction<CartLine[]>) {
+      cartAdapter.setAll(state, action.payload)
+    },
   },
 })
 
-export const { addToCart, increment, decrement, removeFromCart, clearCart } = cartSlice.actions
+export const { addToCart, increment, decrement, removeFromCart, clearCart, replaceCart } =
+  cartSlice.actions
 export const cartReducer = cartSlice.reducer
+
+/** Builds cart state from saved lines, for the store's preloaded state at startup. */
+export function cartStateFromLines(lines: CartLine[]) {
+  return cartAdapter.setAll(cartAdapter.getInitialState(), lines)
+}
 
 const adapterSelectors = cartAdapter.getSelectors((state: RootState) => state.cart)
 
