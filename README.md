@@ -125,4 +125,4 @@ The app has no backend and no user accounts, so the risks are untrusted data and
 - [`CLAUDE.md`](CLAUDE.md) — context and rules given to the AI assistant
 - [`docs/adr-001-state-management.md`](docs/adr-001-state-management.md) — state management decision
 - [`docs/performance-notes.md`](docs/performance-notes.md) — what was measured, found and changed
-- `review/CODE_REVIEW.md` — _coming_
+- [`review/CODE_REVIEW.md`](review/CODE_REVIEW.md) — code review exercise (fetching in `useEffect` without cleanup)

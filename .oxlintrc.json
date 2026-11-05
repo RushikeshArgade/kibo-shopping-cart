@@ -8,5 +8,5 @@
     "react/no-danger": "error",
     "typescript/no-explicit-any": "error"
   },
-  "ignorePatterns": ["dist", "coverage", "playwright-report", "test-results"]
+  "ignorePatterns": ["dist", "coverage", "playwright-report", "test-results", "review/*.before.tsx"]
 }
