@@ -1,18 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
-import { apiCategories, apiProducts } from '../src/test/fixtures/products.ts'
-
-// The API is mocked with the unit-test fixtures so the run doesn't depend on fakestoreapi.
-async function mockApi(page: Page) {
-  await page.route('https://fakestoreapi.com/products/categories', (route) =>
-    route.fulfill({ json: apiCategories }),
-  )
-  await page.route('https://fakestoreapi.com/products', (route) =>
-    route.fulfill({ json: apiProducts }),
-  )
-}
-
-const BACKPACK = 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops'
-const cartLink = (page: Page) => page.getByRole('link', { name: /^Cart,/ })
+import { expect, test } from '@playwright/test'
+import { BACKPACK, cartLink, mockApi } from './helpers.ts'
 
 test('the cart survives a page reload', async ({ page }) => {
   await mockApi(page)
