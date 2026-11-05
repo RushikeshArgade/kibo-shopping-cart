@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router'
 import { CartLink, CartPage } from '../features/cart'
 import { ProductsPage } from '../features/products'
+import { NotFoundPage } from './NotFoundPage'
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<ProductsPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
     </div>

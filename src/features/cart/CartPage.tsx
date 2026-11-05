@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { formatCents } from '../../shared/lib/money'
 import { useAnnounce } from '../../shared/ui/announcerContext'
+import { PageTitle } from '../../shared/ui/PageTitle'
 import {
   decrement,
   increment,
@@ -60,6 +61,7 @@ export function CartPage() {
 
   return (
     <>
+      <PageTitle>Your cart</PageTitle>
       <h1
         ref={headingRef}
         tabIndex={-1}
