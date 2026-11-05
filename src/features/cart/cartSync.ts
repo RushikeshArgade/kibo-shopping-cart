@@ -2,6 +2,7 @@ import { createListenerMiddleware, isAnyOf, type Dispatch } from '@reduxjs/toolk
 import type { RootState } from '../../app/store'
 import {
   addToCart,
+  applyCatalogStock,
   clearCart,
   decrement,
   increment,
@@ -19,7 +20,7 @@ import { CART_STORAGE_KEY, parseSavedCart, saveCart } from './persistence'
 export const cartPersistence = createListenerMiddleware()
 
 cartPersistence.startListening({
-  matcher: isAnyOf(addToCart, increment, decrement, removeFromCart, clearCart),
+  matcher: isAnyOf(addToCart, increment, decrement, removeFromCart, clearCart, applyCatalogStock),
   effect: (_action, api) => saveCart(selectCartLines(api.getState() as RootState)),
 })
 

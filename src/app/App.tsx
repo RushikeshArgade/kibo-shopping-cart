@@ -1,7 +1,14 @@
 import { Link, Route, Routes } from 'react-router'
 import { CartLink, CartPage } from '../features/cart'
-import { ProductsPage } from '../features/products'
+import { ProductsPage, useGetProductsQuery } from '../features/products'
 import { NotFoundPage } from './NotFoundPage'
+
+// The app layer connects the two features, so cart code never imports product code at
+// runtime (only the Product type): no circular dependency between features.
+function CartRoute() {
+  const { data: products } = useGetProductsQuery()
+  return <CartPage products={products} />
+}
 
 export function App() {
   return (
@@ -29,7 +36,7 @@ export function App() {
       <main id="main" className="mx-auto max-w-7xl px-4 py-6">
         <Routes>
           <Route path="/" element={<ProductsPage />} />
-          <Route path="/cart" element={<CartPage />} />
+          <Route path="/cart" element={<CartRoute />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

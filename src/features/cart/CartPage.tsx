@@ -4,27 +4,50 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { formatCents } from '../../shared/lib/money'
 import { useAnnounce } from '../../shared/ui/announcerContext'
 import { PageTitle } from '../../shared/ui/PageTitle'
+import type { Product } from '../products'
 import {
+  applyCatalogStock,
   decrement,
   increment,
   removeFromCart,
   selectCartLines,
-  selectItemCount,
-  selectSubtotalCents,
+  selectReducedIds,
 } from './cartSlice'
 import { CartLineItem } from './CartLineItem'
+import { linesOverStock, reconcile } from './reconcile'
 import type { CartLine } from './types'
 
 type FocusTarget = number | 'heading'
 
 const plural = (count: number) => `${count} ${count === 1 ? 'item' : 'items'}`
 
-export function CartPage() {
+interface CartPageProps {
+  /** Latest catalog, passed in by the app so the cart feature doesn't import product code. */
+  products: Product[] | undefined
+}
+
+export function CartPage({ products }: CartPageProps) {
   const dispatch = useAppDispatch()
   const announce = useAnnounce()
   const lines = useAppSelector(selectCartLines)
-  const itemCount = useAppSelector(selectItemCount)
-  const subtotalCents = useAppSelector(selectSubtotalCents)
+  const reducedIds = useAppSelector(selectReducedIds)
+  const view = reconcile(lines, products)
+
+  // Once the catalog arrives: cap quantities above current stock, and tell the user once
+  // what changed. Out-of-stock and missing products are shown from `view`, not changed.
+  const reconciledWith = useRef<Product[] | null>(null)
+  useEffect(() => {
+    if (!products || reconciledWith.current === products) return
+    reconciledWith.current = products
+
+    const over = linesOverStock(lines, products)
+    if (over.length) dispatch(applyCatalogStock(products))
+    const changes = []
+    if (over.length) changes.push(`${plural(over.length)} reduced to the stock available`)
+    const { unavailableCount } = reconcile(lines, products)
+    if (unavailableCount) changes.push(`${plural(unavailableCount)} unavailable`)
+    if (changes.length) announce(`Your cart was updated: ${changes.join(', ')}.`)
+  }, [products, lines, dispatch, announce])
 
   // When a line disappears, the button that removed it disappears too. Send focus to the
   // next line, else the previous one, else the page heading, so keyboard users aren't lost.
@@ -83,10 +106,12 @@ export function CartPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem] lg:items-start">
           <ul className="flex flex-col gap-3">
-            {lines.map((line) => (
+            {view.lines.map(({ line, status }) => (
               <li key={line.productId}>
                 <CartLineItem
                   line={line}
+                  status={status}
+                  reduced={reducedIds.includes(line.productId)}
                   titleRef={(element) => {
                     if (element) titleRefs.current.set(line.productId, element)
                     else titleRefs.current.delete(line.productId)
@@ -107,9 +132,16 @@ export function CartPage() {
               Summary
             </h2>
             <dl className="mt-3 flex items-baseline justify-between">
-              <dt>Subtotal ({plural(itemCount)})</dt>
-              <dd className="text-lg font-semibold tabular-nums">{formatCents(subtotalCents)}</dd>
+              <dt>Subtotal ({plural(view.availableCount)})</dt>
+              <dd className="text-lg font-semibold tabular-nums">
+                {formatCents(view.subtotalCents)}
+              </dd>
             </dl>
+            {view.unavailableCount > 0 && (
+              <p className="mt-2 text-sm text-slate-700">
+                {plural(view.unavailableCount)} unavailable, not included.
+              </p>
+            )}
             <Link
               to="/"
               className="mt-4 inline-flex min-h-11 items-center font-medium text-blue-700 underline focus-visible:outline-2 focus-visible:outline-blue-700"

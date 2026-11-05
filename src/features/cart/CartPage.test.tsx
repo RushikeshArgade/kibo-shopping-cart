@@ -26,9 +26,15 @@ const ring = product(3, 'Ring', 695)
 
 /** Renders the cart page with the given products added (repeat a product to add it twice). */
 function renderCart(...products: Product[]) {
+  renderCartWithCatalog(undefined, ...products)
+}
+
+/** Same, with the latest catalog the page compares the cart against (undefined = not loaded). */
+function renderCartWithCatalog(catalog: Product[] | undefined, ...products: Product[]) {
   const store = makeStore()
   for (const p of products) store.dispatch(addToCart(p))
-  renderWithProviders(<CartPage />, { store, route: '/cart' })
+  renderWithProviders(<CartPage products={catalog} />, { store, route: '/cart' })
+  return store
 }
 
 const line = (name: string) => within(screen.getByRole('article', { name }))
@@ -130,5 +136,48 @@ describe('CartPage — focus after removing a line', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Decrease quantity of Ring' }))
 
     expect(screen.getByRole('heading', { level: 1, name: 'Your cart' })).toHaveFocus()
+  })
+})
+
+describe('CartPage — reconciling with the latest catalog', () => {
+  it('greys out an out-of-stock product, keeps Remove, and leaves it out of the subtotal', () => {
+    renderCartWithCatalog([backpack, { ...shirt, stock: 0 }], backpack, shirt)
+
+    expect(line('Shirt').getByText('Out of stock')).toBeInTheDocument()
+    expect(line('Shirt').queryByRole('group')).not.toBeInTheDocument() // no stepper
+    expect(line('Shirt').getByRole('button', { name: 'Remove Shirt' })).toBeInTheDocument()
+    expect(screen.getByText('Subtotal (1 item)')).toBeInTheDocument()
+    expect(subtotal()).toHaveTextContent('$109.95')
+    expect(screen.getByText('1 item unavailable, not included.')).toBeInTheDocument()
+  })
+
+  it('marks a product that is no longer in the catalog', () => {
+    renderCartWithCatalog([backpack], backpack, ring) // ring is missing from the catalog
+
+    expect(line('Ring').getByText('No longer available')).toBeInTheDocument()
+    expect(subtotal()).toHaveTextContent('$109.95')
+  })
+
+  it('lowers a quantity above current stock and says so', () => {
+    const store = renderCartWithCatalog([{ ...backpack, stock: 2 }], backpack, backpack, backpack) // 3 in cart, only 2 left
+
+    expect(line('Backpack').getByText('Only 2 left — quantity updated')).toBeInTheDocument()
+    expect(subtotal()).toHaveTextContent('$219.90')
+    expect(store.getState().cart.entities[1]?.quantity).toBe(2) // saved quantity is capped too
+  })
+
+  it('announces what changed, once', () => {
+    renderCartWithCatalog([{ ...backpack, stock: 2 }], backpack, backpack, backpack, ring)
+
+    expect(announcer()).toHaveTextContent(
+      'Your cart was updated: 1 item reduced to the stock available, 1 item unavailable.',
+    )
+  })
+
+  it('shows the cart normally while the catalog is not available', () => {
+    renderCartWithCatalog(undefined, backpack, ring)
+
+    expect(screen.queryByText(/unavailable|Out of stock/)).not.toBeInTheDocument()
+    expect(screen.getByText('Subtotal (2 items)')).toBeInTheDocument()
   })
 })

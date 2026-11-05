@@ -13,11 +13,15 @@ const cartAdapter = createEntityAdapter({ selectId: (line: CartLine) => line.pro
 
 const clamp = (quantity: number, stock: number) => Math.max(0, Math.min(quantity, stock))
 
+// `reducedIds`: lines whose quantity was just lowered to match the catalog, so the cart page
+// can explain why. Only the lines are saved to storage, not this.
+const initialState = () => cartAdapter.getInitialState({ reducedIds: [] as number[] })
+
 // Reducers are synchronous and clamp on every change, so any number of rapid clicks can
 // never push a quantity past stock.
 const cartSlice = createSlice({
   name: 'cart',
-  initialState: cartAdapter.getInitialState(),
+  initialState: initialState(),
   reducers: {
     addToCart(state, action: PayloadAction<Product>) {
       const { id, title, image, priceCents, stock } = action.payload
@@ -52,6 +56,23 @@ const cartSlice = createSlice({
     clearCart(state) {
       cartAdapter.removeAll(state)
     },
+    /**
+     * Refreshes each line's stock from the latest catalog and caps quantities above it.
+     * Out-of-stock and missing products are left as they are: the cart page shows them as
+     * unavailable from the live catalog, and the saved line stays valid.
+     */
+    applyCatalogStock(state, action: PayloadAction<Product[]>) {
+      state.reducedIds = []
+      for (const product of action.payload) {
+        const line = state.entities[product.id]
+        if (!line || product.stock <= 0) continue
+        line.snapshot.stock = product.stock
+        if (line.quantity > product.stock) {
+          line.quantity = product.stock
+          state.reducedIds.push(product.id)
+        }
+      }
+    },
     /** Replaces the whole cart, e.g. with the version another tab saved. */
     replaceCart(state, action: PayloadAction<CartLine[]>) {
       cartAdapter.setAll(state, action.payload)
@@ -59,13 +80,20 @@ const cartSlice = createSlice({
   },
 })
 
-export const { addToCart, increment, decrement, removeFromCart, clearCart, replaceCart } =
-  cartSlice.actions
+export const {
+  addToCart,
+  increment,
+  decrement,
+  removeFromCart,
+  clearCart,
+  applyCatalogStock,
+  replaceCart,
+} = cartSlice.actions
 export const cartReducer = cartSlice.reducer
 
 /** Builds cart state from saved lines, for the store's preloaded state at startup. */
 export function cartStateFromLines(lines: CartLine[]) {
-  return cartAdapter.setAll(cartAdapter.getInitialState(), lines)
+  return cartAdapter.setAll(initialState(), lines)
 }
 
 const adapterSelectors = cartAdapter.getSelectors((state: RootState) => state.cart)
@@ -83,3 +111,5 @@ export const selectSubtotalCents = createSelector([selectCartLines], (lines) =>
 
 export const selectQuantityById = (state: RootState, productId: number) =>
   state.cart.entities[productId]?.quantity ?? 0
+
+export const selectReducedIds = (state: RootState) => state.cart.reducedIds

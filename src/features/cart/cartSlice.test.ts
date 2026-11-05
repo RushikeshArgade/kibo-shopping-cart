@@ -3,6 +3,7 @@ import { makeStore } from '../../app/store'
 import type { Product } from '../products'
 import {
   addToCart,
+  applyCatalogStock,
   clearCart,
   decrement,
   increment,
@@ -10,6 +11,7 @@ import {
   selectCartLines,
   selectItemCount,
   selectQuantityById,
+  selectReducedIds,
   selectSubtotalCents,
 } from './cartSlice'
 
@@ -223,5 +225,40 @@ describe('selectors', () => {
     dispatch({ type: 'unrelated/action' })
 
     expect(selectCartLines(store.getState())).toBe(first)
+  })
+})
+
+describe('applyCatalogStock', () => {
+  it('lowers quantities above current stock and records which lines changed', () => {
+    const { store, dispatch, qty } = setup()
+    for (let i = 0; i < 4; i++) dispatch(addToCart(product(1, { stock: 5 })))
+    dispatch(addToCart(product(2, { stock: 5 })))
+
+    dispatch(applyCatalogStock([product(1, { stock: 2 }), product(2, { stock: 5 })]))
+
+    expect(qty(1)).toBe(2)
+    expect(qty(2)).toBe(1)
+    expect(selectReducedIds(store.getState())).toEqual([1])
+  })
+
+  it('refreshes the saved stock so + respects the new limit', () => {
+    const { dispatch, qty } = setup()
+    dispatch(addToCart(product(1, { stock: 5 })))
+
+    dispatch(applyCatalogStock([product(1, { stock: 1 })]))
+    dispatch(increment(1))
+
+    expect(qty(1)).toBe(1)
+  })
+
+  it('leaves out-of-stock and missing products unchanged (the page shows them as unavailable)', () => {
+    const { dispatch, lines } = setup()
+    dispatch(addToCart(product(1, { stock: 5 })))
+    dispatch(addToCart(product(2, { stock: 5 })))
+    const before = lines()
+
+    dispatch(applyCatalogStock([product(1, { stock: 0 }), product(3, { stock: 9 })])) // 2 missing
+
+    expect(lines()).toEqual(before)
   })
 })
