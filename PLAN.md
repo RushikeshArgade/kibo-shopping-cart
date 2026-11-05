@@ -11,14 +11,14 @@ Working one step at a time. Each step follows the same loop:
 
 ## Progress
 
-| Phase                           | Status         |
-| ------------------------------- | -------------- |
-| 0. Decisions + AI context       | ✅ Done        |
-| 1. Architecture                 | 🟡 ADR pending |
-| 2. Build in slices              | 🟡 In progress |
-| 3. Tests (per slice + e2e)      | ⬜             |
-| 4. Performance                  | ⬜             |
-| 5. Security, review, docs, ship | ⬜             |
+| Phase                           | Status  |
+| ------------------------------- | ------- |
+| 0. Decisions + AI context       | ✅ Done |
+| 1. Architecture                 | ✅ Done |
+| 2. Build in slices              | ✅ Done |
+| 3. Tests (per slice + e2e)      | ✅ Done |
+| 4. Performance                  | ✅ Done |
+| 5. Security, review, docs, ship | ✅ Done |
 
 ## Steps
 
@@ -114,32 +114,33 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
   as "Y". CI now runs `npm run coverage` (thresholds enforced) and uploads the HTML report.
 - README "Testing" section: tools, threshold and why, the deliberately unhandled edge case.
 
-### ⬜ 10. Responsive and accessibility pass
+### ✅ 10. Responsive and accessibility pass
 
-- Check 320px / tablet / desktop, keyboard-only walkthrough, contrast check, screen reader spot check.
-- Record trade-offs in the README.
+- No horizontal scroll at 320 / 768 / 1280px on every page; keyboard order and focus rings
+  checked with real Tab presses; contrast measured in the browser (all AA, lowest 4.95:1).
+- Found and fixed "Max 0 in cart" on products that sold out after being added.
+- README section with choices and trade-offs (native `disabled` focus loss, categories as-is).
 
-### ⬜ 11. Performance
+### ✅ 11. Performance
 
-- Measure: React Profiler (what re-renders on add to cart), Lighthouse, bundle analysis.
-- Known starting point: JS bundle grew from 264 KB (84 KB gzip) at scaffold to 431 KB
-  (135 KB gzip) after step 4 — mostly RTK Query and Zod.
-- Fix what's found; write **`docs/performance-notes.md`** with before/after evidence.
+- Bundle: Zod was ~19% of the JS → `zod/mini`: 139 → 125 KB gzipped (−10%), tests unchanged.
+- Re-renders: one "Add to cart" re-renders only that button — nothing to fix.
+- LCP ≈ 14.7 s on slow 4G, dominated by 2.7 MB of images per page; priority hints measured with
+  no gain and removed; real fix (resized images) documented. `docs/performance-notes.md`.
 
-### ⬜ 12. Security
+### ✅ 12. Security
 
-- `npm audit`, review API/persisted data handling.
-- Security headers on Vercel: the live site currently sends HSTS only — add CSP,
-  `X-Content-Type-Options`, `Referrer-Policy`, frame protection.
-- Findings and decisions in the README.
+- `npm audit`: 0 vulnerabilities. CSP, nosniff, frame protection, Referrer-Policy and
+  Permissions-Policy in `vercel.json`, tested locally first and verified live. README section.
 
-### ⬜ 13. Code review exercise
+### ✅ 13. Code review exercise
 
-- I pick an anti-pattern I've met in production; write the "before" component and refactor.
-- **`review/CODE_REVIEW.md`** written as a PR comment to a teammate.
+- Fetching in `useEffect` without cleanup: before/after `ProductSearch`, tests that reproduce
+  the race and prove the fix, `review/CODE_REVIEW.md` as a PR comment.
 
-### ⬜ 14. Docs and final review
+### ✅ 14. Docs and final review
 
-- README complete (versions, setup, testing, architecture, trade-offs, skipped edge case).
-- Developer log complete: AI strategy, ≥3 audits, verification, disagreement — all in my words.
-- Fresh clone → install → test → build works. Submit repo link + live URL.
+- README: features, versions, setup, architecture, testing, accessibility, security,
+  performance, trade-offs and future improvements.
+- Developer log: AI strategy, iterated prompt, 3 human audits, verification, disagreement.
+- Final checks from a fresh clone; submit repo link + live URL.

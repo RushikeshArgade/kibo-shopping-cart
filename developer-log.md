@@ -9,13 +9,36 @@
 
 ### How I gave the AI context
 
-- `CLAUDE.md` at the repo root holds the stack, folder structure, API schema, conventions and
-  the decisions already made, so every session starts from the same constraints.
-- _TODO: how prompting differed for architecture vs implementation vs tests._
+- `CLAUDE.md` at the repo root holds the stack, folder structure, the API's JSON schema, coding
+  conventions and every decision already made, so each session starts from the same constraints.
+- I kept adding rules to it when I saw a problem, instead of repeating myself:
+  - **Ask before every commit** and show the exact message (after the AI committed on its own).
+  - **Short Conventional Commit messages** (`type(scope): description`).
+  - **Verify claims by running them, not from memory** (after wrong floating-point examples).
+  - **State assumptions and trade-offs** in every response, so I could review them.
+
+### How my prompting differed by task
+
+- **Architecture:** I asked for options and a debate, not an answer — e.g. "debate the state
+  management options for this assessment". I compared the trade-offs and made the call myself
+  (Redux Toolkit + RTK Query), then had the AI write the ADR from my decision.
+- **Implementation:** plan first, code second. For each step the AI proposed the files, tests and
+  a few decisions with a recommendation; I approved or changed them (e.g. categories shown as-is,
+  native `disabled`). When work started getting complicated I said "keep it simple" and it had to
+  scale back. Each step ended with checks, a browser check and a commit I approved.
+- **Tests:** I set the rule that a test only counts if it fails when the behaviour is broken, so
+  every important test was break-tested (code broken on purpose, test must fail, code restored).
 
 ### A prompt I had to iterate on
 
-- _TODO: first prompt, what was wrong with the output, revised prompt._
+- **First prompt:** "Review CLAUDE.md first." The review came back mostly against the **job
+  description** (e.g. it suggested design tokens), not against what I'm being graded on.
+- **Why it wasn't good enough:** the assessment brief is the actual scoring sheet; the JD is
+  context. Reviewing against the wrong source missed real requirements.
+- **Revised prompt:** "Review against the Assessment and not with the JD this time." The second
+  pass found gaps the first one missed — no responsive rules, no colour contrast, no e2e flow, no
+  coverage threshold, no dependency audit, CI or deploy — and a performance rule that contradicted
+  the brief. (See Human Audit #1.)
 
 ## Decision log
 
@@ -153,11 +176,11 @@ everywhere else.
 
 ## Human Audit (≥3, at least one structural)
 
-| #   | Area                         | What the AI produced                             | What I changed and why                                                                                                                                           |
-| --- | ---------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | AI context file (structural) | First `CLAUDE.md` draft, reviewed against the JD | Asked for a re-review against the assessment brief. Added responsive rules, contrast, e2e flow, coverage threshold, audit, CI, deploy; fixed a performance rule. |
-| 2   |                              |                                                  |                                                                                                                                                                  |
-| 3   |                              |                                                  |                                                                                                                                                                  |
+| #   | Area                         | What the AI produced                                                                   | What I changed and why                                                                                                                                           |
+| --- | ---------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | AI context file (structural) | First `CLAUDE.md` draft, reviewed against the JD                                       | Asked for a re-review against the assessment brief. Added responsive rules, contrast, e2e flow, coverage threshold, audit, CI, deploy; fixed a performance rule. |
+| 2   | Accessibility fix (rejected) | An `aria-disabled` rework of the stock-limit buttons, plus a hard-to-verify focus test | Rejected as too complex for the benefit; kept native `disabled` and documented the trade-off.                                                                    |
+| 3   | AI working process           | Commits made without asking; long commit messages                                      | Added two rules to `CLAUDE.md`: approval before every commit, and short Conventional Commits.                                                                    |
 
 _Before/after snippets go under each entry._
 
@@ -188,6 +211,61 @@ After:
 Why: the brief asks me to find and fix a real performance issue in my own code and says not to
 assume there isn't one. A rule that makes the AI optimize everything upfront skips the measuring
 and turns performance into an assumption.
+
+### 2. Rejected an over-engineered accessibility fix
+
+Browser testing showed that when "Add to cart" or `+` disables itself at the stock limit while
+focused, keyboard focus drops to the top of the page. Claude reworked both buttons to use
+`aria-disabled` (focusable, with an extra announcement when pressed), changed shared button
+styles, and tried to prove it with an end-to-end focus test — which kept passing even with the
+bug, because headless browsers don't reproduce the focus loss.
+
+Before (AI's version, never committed):
+
+```tsx
+<Button
+  onClick={add} // returns early and announces "Only 3 available" when at the limit
+  disabled={outOfStock}
+  aria-disabled={atMax || undefined}
+>
+```
+
+After (what I asked for):
+
+```tsx
+<Button onClick={add} disabled={atMax}>
+```
+
+Why: it was getting complex, and the time was going into proving it rather than building the
+remaining requirements. I chose the simple implementation and documented the trade-off in the
+README's accessibility section, which is what the brief asks for when trade-offs are made under
+time pressure. The useful part (explicit `aria-label`s, which fixed a real naming bug in Chrome)
+was kept.
+
+### 3. Corrected how the AI worked, not just what it wrote
+
+After I approved the first commit, Claude made a second commit on its own, and neither commit
+message had been shown to me (the first was 66 characters with a 5-line body). I want to own the
+git history, so I added rules to `CLAUDE.md`.
+
+Before: no rule — the AI decided when and how to commit.
+
+After:
+
+```md
+- **Never commit without asking.** Before every commit, list the files and the exact commit
+  message, and wait for my approval. Approval for one commit does not cover the next.
+
+## Commit messages
+
+Conventional Commits, kept short:
+<type>(<optional scope>): <short description>
+
+- Subject: imperative, lowercase, no period, ≤ 50 characters (hard limit 72).
+```
+
+From then on every commit was proposed first, and I changed messages when needed (for example,
+asking for a body on the money helpers commit to explain why money is stored in cents).
 
 ## Verification — AI-generated tests
 
@@ -254,5 +332,21 @@ noted as a manual check.
 
 ## A Disagreement
 
-- _TODO: pick the strongest one. Candidates so far: Next.js vs Vite + React; keeping unavailable
-  items visible instead of removing them; categories shown as-is instead of a label map._
+### Category names: a label map in the UI vs fixing the data at the source
+
+The API sends categories in lowercase and with a typo (`jewelery`). Claude recommended a small
+label map in the frontend — `jewelery` → "Jewelry", capitalised names, with a fallback — because
+a visible typo looks unpolished and the brief scores UI polish.
+
+I didn't go with it. The original data should be fixed, not patched in the UI. Today it's one
+category; if more come in the future, do we write a patch for each of them? Fixing the source data
+once is easier to identify and maintain — one single source of truth. In a real team I'd raise it
+with the backend/data owners rather than hide it in the frontend.
+
+Other times I overrode the AI, for reference:
+
+- **Next.js → Vite + React:** I haven't used Next.js and chose to spend the time on what's being
+  evaluated; the cost (no SSR) is documented.
+- **Unavailable cart items:** instead of removing them and showing a notice, I kept them visible
+  as disabled lines so the user sees what happened.
+- **`aria-disabled` rework:** rejected as too complex for the time (Human Audit #2).

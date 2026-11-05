@@ -6,13 +6,36 @@ Shopping cart web application built for the Kibo Commerce Senior UI Engineer ass
 
 **Live:** https://kibo-shopping-cart-psi.vercel.app
 
-> Work in progress. Architecture, testing, performance, security and accessibility notes will be
-> completed as each feature lands.
+## Features
 
-## Stack
+- **Product listing** from [fakestoreapi.com](https://fakestoreapi.com/products): image, title,
+  price, category, rating and stock status; loading skeletons, empty state, and an error state with
+  "Try again".
+- **Search, category filter, sort** (price, rating, name) and **pagination** — all kept in the URL,
+  so views can be shared and the Back button works.
+- **Cart:** add, increase, decrease and remove; quantities never exceed stock (the API has no stock,
+  so a deterministic fake inventory is added); live header count; subtotal in exact cents.
+- **Persists across reloads** (`localStorage`) and **stays in sync across tabs**.
+- **Stale carts are reconciled** with the latest catalog: out-of-stock and discontinued products
+  are shown greyed out and left out of the subtotal; quantities above current stock are lowered.
+- Responsive from 320px up, keyboard and screen-reader friendly, CSP and security headers.
 
-React 19 · TypeScript 7 (strict) · Vite 8 · Tailwind CSS 4 · Redux Toolkit 2 + RTK Query ·
-React Router 8 · Zod 4 · Vitest 5 + React Testing Library + MSW 3 · Playwright
+## Stack and versions
+
+| Area                   | Library                                  | Version              |
+| ---------------------- | ---------------------------------------- | -------------------- |
+| UI                     | React, React DOM                         | 19.3.1               |
+| Language               | TypeScript (strict)                      | 7.0.2                |
+| Build                  | Vite                                     | 8.3.5                |
+| Styling                | Tailwind CSS                             | 4.3.4                |
+| State and data         | Redux Toolkit (+ RTK Query), React Redux | 2.14.0, 9.3.1        |
+| Routing                | React Router                             | 8.5.1                |
+| Validation             | Zod (`zod/mini`)                         | 4.6.7                |
+| Unit / component tests | Vitest, React Testing Library, MSW       | 5.1.0, 16.3.3, 3.0.3 |
+| End-to-end tests       | Playwright                               | 1.64.1               |
+| Lint / format          | oxlint, Prettier                         | 1.91.0, 3.9.10       |
+
+Runtime: Node.js 24 (tested with 24.22.1). Exact versions are pinned in `package-lock.json`.
 
 ## Getting started
 
@@ -22,6 +45,37 @@ Requires Node.js 24+.
 npm install
 npm run dev
 ```
+
+Open the URL Vite prints (usually http://localhost:5173).
+
+## Architecture
+
+```
+src/
+  app/          store, typed hooks, App shell, routes (connects the features)
+  features/
+    products/   RTK Query API + Zod schemas, fake inventory, catalog logic, listing UI
+    cart/       cart slice + selectors, persistence and tab sync, reconciliation, cart UI
+  shared/
+    lib/        money helpers (integer cents)
+    ui/         Button, Pagination, QuantityStepper, StarRating, Announcer, PageTitle
+  test/         test setup, render helper, MSW server, fixtures
+e2e/            Playwright specs
+docs/           ADR and performance notes
+review/         code review exercise
+```
+
+- **Three kinds of state, each in the place that fits it** (see the
+  [ADR](docs/adr-001-state-management.md)):
+  - **Server data** (products, categories) — RTK Query, validated with Zod in a `queryFn`, retried
+    once on network errors and 5xx.
+  - **Client data** (cart) — a Redux slice; every action clamps quantity to stock; saved to
+    `localStorage` by a listener middleware and synced across tabs.
+  - **View state** (search, category, sort, page) — the URL.
+- **Feature boundaries:** each feature exposes a public `index.ts`. The cart only imports the
+  `Product` _type_ from products; the app layer passes product data into the cart page, so there's
+  no runtime dependency cycle between features.
+- **Money** is integer cents everywhere; dollars only appear at the API boundary and on screen.
 
 ## Scripts
 
@@ -118,6 +172,36 @@ The app has no backend and no user accounts, so the risks are untrusted data and
 - **CI:** the GitHub Actions workflow has read-only permissions (`contents: read`).
 - **Not done:** no automated dependency updates (e.g. Dependabot) and no Subresource Integrity —
   all scripts are served from the app's own origin, so SRI adds little here.
+
+## Performance
+
+Measured before changing anything — details and numbers in
+[`docs/performance-notes.md`](docs/performance-notes.md):
+
+- **Bundle:** Zod was ~19% of the JavaScript; switching to `zod/mini` cut the bundle from 139 KB
+  to 125 KB gzipped (−10%) with identical validation (all tests unchanged).
+- **Re-renders:** adding to the cart re-renders only the clicked button and the header badge —
+  none of the other product cards.
+- **Loading:** LCP is dominated by the API's 1500px PNG images (~2.7 MB per page). Priority hints
+  and preconnect were measured and gave no improvement, so they were removed; the real fix is
+  resized WebP/AVIF images from an image CDN, which isn't possible with a third-party API.
+
+## Trade-offs and future improvements
+
+- **Single-page app (no SSR):** I chose Vite + React over Next.js. For a real storefront, server
+  rendering would help SEO and first load.
+- **Fake inventory:** stock is derived from the product id, so "stock changed" only happens in
+  tests or with an old saved cart. A real store would check stock on the server.
+- **Cart is per browser:** signed-in users would need a server-side cart; tabs use "last write
+  wins" rather than merging simultaneous edits.
+- **Not built:** checkout, product detail page, "notify me when back in stock" (needs a backend),
+  automated accessibility scanning in CI, resized images.
+
+## AI-assisted development
+
+Built with Claude Code as a pair: I made the decisions; the AI drafted options, code and docs,
+which I reviewed, tested and corrected. How I directed and checked it is in
+[`developer-log.md`](developer-log.md); the rules I gave it are in [`CLAUDE.md`](CLAUDE.md).
 
 ## Project docs
 
