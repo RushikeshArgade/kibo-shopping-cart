@@ -67,11 +67,14 @@ developer log, tooling. Commits: scaffold, LF endings, commit rules.
   together with the change before it — kept as designed.
 - **Tests:** 97 passing; catalog logic 100%; deep links, URL sync, page reset, focus.
 
-### ⬜ 5. Cart state
+### ✅ 5. Cart state
 
-- `cartSlice`: add, increment, decrement (1 → remove), remove, clamp to `1..stock`.
-- Lines store id, quantity and snapshot. Selectors: item count, subtotal in cents.
-- **Tests:** 100% on reducers/selectors — rapid adds can't exceed stock, totals in cents.
+- `cartSlice` (`createEntityAdapter`): add, increment, decrement (1 → remove), remove, clear;
+  every change clamped to stock. Adding a product already in the cart refreshes its snapshot.
+- Lines store id, quantity and snapshot (title, image, price, stock). Selectors: lines, item
+  count, subtotal in cents, quantity by id.
+- Per-file 100% coverage thresholds for cart and money files — verified to fail when coverage drops.
+- **Tests:** 18 cart tests at 100%; 115 overall.
 
 ### ⬜ 6. Cart UI
 

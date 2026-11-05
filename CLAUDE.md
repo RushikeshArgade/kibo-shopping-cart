@@ -166,6 +166,9 @@ file only, never from deep paths inside another feature.
 - Propose a plan and the files you will touch before writing non-trivial code.
 - Keep changes small: one vertical slice per change.
 - **State your assumptions and trade-offs explicitly** in each response so they can be reviewed.
+- **Verify claims by running them, not from memory.** Numeric facts (e.g. a floating-point
+  result), library APIs and options, and browser behaviour must be checked — in Node, in the
+  installed package's types/source, or in the browser — before they go into code, comments or tests.
 - Run `npm run typecheck && npm run lint && npm test` before calling work done.
 - **Never commit without asking.** Before every commit, list the files and the exact commit
   message, and wait for my approval. Approval for one commit does not cover the next.
