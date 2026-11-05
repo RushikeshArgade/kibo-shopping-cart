@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import * as z from 'zod/mini'
 import type { CartLine } from './types'
 
 export const CART_STORAGE_KEY = 'kibo-cart'
@@ -11,16 +11,16 @@ const savedCartSchema = z.object({
   lines: z.array(
     z
       .object({
-        productId: z.int().positive(),
-        quantity: z.int().positive(),
+        productId: z.int().check(z.positive()),
+        quantity: z.int().check(z.positive()),
         snapshot: z.object({
-          title: z.string().min(1),
+          title: z.string().check(z.minLength(1)),
           image: z.url({ protocol: /^https$/ }),
-          priceCents: z.int().nonnegative(),
-          stock: z.int().nonnegative(),
+          priceCents: z.int().check(z.nonnegative()),
+          stock: z.int().check(z.nonnegative()),
         }),
       })
-      .refine((line) => line.quantity <= line.snapshot.stock),
+      .check(z.refine((line) => line.quantity <= line.snapshot.stock)),
   ),
 })
 

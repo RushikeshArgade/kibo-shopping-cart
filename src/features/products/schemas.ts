@@ -1,24 +1,28 @@
-import { z } from 'zod'
+// zod/mini: same validation as `zod` with a tree-shakable functional API — 7.6 KB gzipped
+// instead of 27 KB for these schemas (see docs/performance-notes.md).
+import * as z from 'zod/mini'
 import { toCents } from '../../shared/lib/money'
 import { stockFor } from './inventory'
 import type { Product } from './types'
 
+const nonEmptyText = () => z.string().check(z.trim(), z.minLength(1))
+
 // The API is untrusted input: every field is checked before it reaches the store.
 export const apiProductSchema = z.object({
-  id: z.int().positive(),
-  title: z.string().trim().min(1),
-  price: z.number().nonnegative(),
+  id: z.int().check(z.positive()),
+  title: nonEmptyText(),
+  price: z.number().check(z.nonnegative()),
   description: z.string(),
-  category: z.string().trim().min(1),
+  category: nonEmptyText(),
   // HTTPS only: blocks http (mixed content) and javascript:/data: URLs.
   image: z.url({ protocol: /^https$/ }),
   rating: z.object({
-    rate: z.number().min(0).max(5),
-    count: z.int().nonnegative(),
+    rate: z.number().check(z.gte(0), z.lte(5)),
+    count: z.int().check(z.nonnegative()),
   }),
 })
 
-export const categoriesSchema = z.array(z.string().trim().min(1))
+export const categoriesSchema = z.array(nonEmptyText())
 
 export class InvalidResponseError extends Error {
   override name = 'InvalidResponseError'
