@@ -1,8 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { cartReducer } from '../features/cart'
 import { productsApi } from '../features/products'
 
 const rootReducer = combineReducers({
   [productsApi.reducerPath]: productsApi.reducer,
+  cart: cartReducer,
 })
 
 export function makeStore(preloadedState?: Partial<RootState>) {

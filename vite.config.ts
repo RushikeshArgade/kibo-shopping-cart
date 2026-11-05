@@ -34,9 +34,15 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/main.tsx', 'src/test/**', 'src/**/*.test.{ts,tsx}'],
       reporter: ['text', 'html'],
-      // 80% overall; stricter per-file thresholds for cart logic and money helpers are added
-      // with those files (see CLAUDE.md → Testing).
-      thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+      // 80% overall; 100% where a bug costs money: cart logic and money helpers.
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+        'src/features/cart/**/*.ts': { lines: 100, functions: 100, branches: 100, statements: 100 },
+        'src/shared/lib/money.ts': { lines: 100, functions: 100, branches: 100, statements: 100 },
+      },
     },
   },
 })
