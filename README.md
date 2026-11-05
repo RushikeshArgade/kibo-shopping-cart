@@ -94,6 +94,31 @@ and 1280px on every page — no horizontal scrolling. Touch targets are at least
 - **No automated accessibility scanner** (such as axe) in CI yet — contrast and keyboard order were
   checked manually in the browser.
 
+## Security
+
+The app has no backend and no user accounts, so the risks are untrusted data and the page itself.
+
+- **API data is untrusted.** Every product and the category list are validated with Zod before
+  they reach the store; a malformed product is dropped instead of breaking the page. Image URLs
+  must be `https:` — `http:`, `javascript:` and `data:` URLs are rejected.
+- **Saved cart is untrusted too.** What's read back from `localStorage` is validated the same way
+  (with a version number); anything invalid gives an empty cart. Nothing sensitive is stored —
+  only product ids, quantities and display data.
+- **No HTML injection.** All text is rendered by React as text; `dangerouslySetInnerHTML` is
+  banned by a lint rule.
+- **Security headers** (`vercel.json`): a Content Security Policy that only allows the app's own
+  scripts and styles and the API's host for data and images, blocks plugins, base-tag and form
+  hijacking, and framing (`frame-ancestors 'none'` and `X-Frame-Options: DENY` against
+  clickjacking); plus `X-Content-Type-Options: nosniff`, `Referrer-Policy` and a
+  `Permissions-Policy` that turns off camera, microphone, geolocation and payment. HSTS comes from
+  Vercel. The policy was tested locally on the production build with the same headers: the app
+  worked and the browser reported no violations.
+- **Dependencies:** `npm audit` reports 0 vulnerabilities (all and production-only). The
+  lockfile is committed and CI installs with `npm ci`.
+- **CI:** the GitHub Actions workflow has read-only permissions (`contents: read`).
+- **Not done:** no automated dependency updates (e.g. Dependabot) and no Subresource Integrity —
+  all scripts are served from the app's own origin, so SRI adds little here.
+
 ## Project docs
 
 - [`developer-log.md`](developer-log.md) — AI-augmentation log
