@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { App } from '../../app/App'
+import { makeStore } from '../../app/store'
 import { renderWithProviders } from '../../test/render'
+import { cartStateFromLines } from './cartSlice'
 
 async function renderShop() {
   renderWithProviders(<App />)
@@ -71,5 +73,23 @@ describe('Add to cart', () => {
 
     expect(addButton(/Silicon Power/)).toBeDisabled()
     expect(card(/Silicon Power/).getByText('Out of stock')).toBeInTheDocument()
+  })
+
+  it('says how many are in the cart when a product sold out after it was added', async () => {
+    // A saved cart from earlier still holds product 11, which is now out of stock.
+    const store = makeStore({
+      cart: cartStateFromLines([
+        {
+          productId: 11,
+          quantity: 1,
+          snapshot: { title: 'SSD', image: 'https://x.test/a.png', priceCents: 10900, stock: 5 },
+        },
+      ]),
+    })
+    renderWithProviders(<App />, { store })
+    await screen.findAllByRole('article')
+
+    expect(card(/Silicon Power/).getByText('1 in cart')).toBeInTheDocument()
+    expect(card(/Silicon Power/).queryByText(/Max 0/)).not.toBeInTheDocument()
   })
 })

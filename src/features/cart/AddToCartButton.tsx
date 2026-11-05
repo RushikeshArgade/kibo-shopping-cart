@@ -33,7 +33,10 @@ export function AddToCartButton({ product }: { product: Product }) {
       </Button>
       {/* Always takes one line, even when empty, so cards in a row keep prices and buttons aligned. */}
       <p className="mt-1 min-h-4 text-xs text-slate-700">
-        {inCart > 0 && (atMax ? `Max ${product.stock} in cart` : `${inCart} in cart`)}
+        {/* "Max" only makes sense while there is stock; a product that sold out after it was
+            added just shows how many are in the cart. */}
+        {inCart > 0 &&
+          (atMax && product.stock > 0 ? `Max ${product.stock} in cart` : `${inCart} in cart`)}
       </p>
     </div>
   )
